@@ -2,12 +2,16 @@ import Image from "next/image";
 import profilePic from "../public/image/draw2.svg";
 import { setLogin } from "../services/auth";
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { ToastContainer, toast } from "react-toastify";
+import Cookies from "js-cookie";
 import "react-toastify/dist/ReactToastify.css";
+import { redirect } from "next/dist/server/api-utils";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const onSubmit = async () => {
     const data = {
@@ -21,13 +25,19 @@ export default function Home() {
       const response = await setLogin(data);
       // console.log(response.status);
       if (response.error) {
-        toast.error(response.message);
+        // toast.error(response.message);
+        toast.error("Email dan Password tidak sesuai!!!");
       } else {
-        toast.success(response.message);
+        // toast.success(response.message);
+        toast.success("Login berhasil!!!");
+        console.log(response.data);
+        const { token } = response.data;
+        const tokenBase64 = btoa(token);
+        Cookies.set("token", tokenBase64, { expires: 1 });
+        router.push("/Home");
       }
     }
   };
-
   return (
     <>
       <section className="vh-100">
@@ -100,4 +110,19 @@ export default function Home() {
       <ToastContainer />
     </>
   );
+}
+
+export async function getServerSideProps({ req, res }) {
+  const { token } = req.cookies;
+  if (token) {
+    return {
+      redirect: {
+        destination: "/Home",
+        permanent: false,
+      },
+    };
+  }
+  return {
+    props: {},
+  };
 }
