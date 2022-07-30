@@ -17,19 +17,14 @@ export default function Home() {
       email: email,
       password: password,
     };
-    // console.log(data);
     if (!email || !password) {
       toast.error("Email dan Password wajib diisi!!!");
     } else {
       const response = await setLogin(data);
-      // console.log(response);
       if (response.error) {
         toast.error(response.message);
-        // toast.error("Email dan Password tidak sesuai!!!");
       } else {
         toast.success(response.message);
-        // toast.success("Login berhasil!!!");
-        // console.log(response.data);
         const { token } = response.data;
         const tokenBase64 = btoa(token);
         Cookies.set("token", tokenBase64, { expires: 1 });
